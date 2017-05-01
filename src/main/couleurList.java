@@ -23,7 +23,6 @@ public class couleurList extends DefaultListCellRenderer
 	         String txtFileNew = readFile(PC_PATH+"new_title.txt", Charset.defaultCharset());
 			if(txtFileNew != "" && txtFileNew.contains((CharSequence) value))
 	        {
-				System.out.println("***********yes***********");
 				c.setBackground(new Color(255,196,196));
 	        }
 		} catch (IOException e) {

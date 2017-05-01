@@ -16,13 +16,11 @@ import javax.swing.JFrame;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 
-import org.apache.commons.net.ftp.FTPClient;
-
 import net.miginfocom.swing.MigLayout;
 
 public class folderWindow extends JFrame
 {
-	public folderWindow(FTPClient fClient)
+	public folderWindow()
 	{
 		setSize(400,200);
 		
@@ -95,7 +93,7 @@ public class folderWindow extends JFrame
 					}
 					
 					dispose();
-					new mainWindow(fClient);
+					new mainWindow();
 				}
 			}
 		});

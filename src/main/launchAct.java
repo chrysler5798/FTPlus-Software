@@ -12,40 +12,18 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPReply;
 
 import main.window.folderWindow;
 import main.window.mainWindow;
+import main.window.userWindow;
 
 public class launchAct
 {
-	final static String SERVER_IP = "";
-	final static int PORT = 21;
-	final static String USER = "";
-	final static String PASSWORD = "";
 	final static String newline = System.getProperty("line.separator");
-	
 	final static String PC_PATH = System.getenv("APPDATA")+File.separator+"FTPlus"+File.separator;
-	
-	private static String printServerReply(FTPClient ftpClient)
-	{
-		String txtR = "";
-		String[] msgs = ftpClient.getReplyStrings();
-		if(msgs != null && msgs.length > 0)
-		{
-			for (String string : msgs)
-			{
-				txtR += newline+"SERVER: "+string;
-			}
-		}
-		return txtR;
-	}
 	
 	public static void main(String[] args) throws IOException, InterruptedException
 	{
-		FTPClient fClient = new FTPClient();
-		
-		String result;
 		
 		setupFolder();
 		
@@ -58,28 +36,42 @@ public class launchAct
 		    dialog.setVisible(true);
 		    System.exit(0);
 		}
-	    
-		try
+		
+		
+		if(readFile(PC_PATH+"user.txt").isEmpty())
 		{
-			fClient.connect(SERVER_IP, PORT);
-			System.out.println(printServerReply(fClient));
-			int replayCode = fClient.getReplyCode();
-			if(!FTPReply.isPositiveCompletion(replayCode))
-			{
-				result = "Erreur "+replayCode;
-				return;
-			}
-			boolean success = fClient.login(USER, PASSWORD);
-			System.out.println(printServerReply(fClient));
+			new userWindow();
+		}
+		else if(readFile(PC_PATH+"setup.txt").isEmpty())
+		{
+			new folderWindow();
+		}
+		else
+		{
+			new mainWindow();
+		}
+	    
+		//try
+		//{
+			//fClient.connect(SERVER_IP, PORT);
+			//System.out.println(printServerReply(fClient));
+			//int replayCode = fClient.getReplyCode();
+			//if(!FTPReply.isPositiveCompletion(replayCode))
+			//{
+			//	result = "Erreur "+replayCode;
+			//	return;
+			//}
+			//boolean success = fClient.login(USER, PASSWORD);
+			//System.out.println(printServerReply(fClient));
 			
-			if(!success)
-			{
-				result = "Erreur : User FTP";
-				return;
-			}
-			else
-			{
-				result = "Tout : OK";
+			//if(!success)
+			//{
+			//	result = "Erreur : User FTP";
+			//	return;
+			//}
+			//else
+			//{
+			//	result = "Tout : OK";
 				
 //				String pathFtp = "ftplus/khrys/";
 //				
@@ -100,24 +92,13 @@ public class launchAct
 //					}
 //					outStream.close();
 //				}
-			}
-		}
-		catch (IOException ex)
-		{
-			result = "Erreur";
-			ex.printStackTrace();
-		}
-		
-		System.out.println(result);
-		
-		if(readFile(PC_PATH+"setup.txt").isEmpty())
-		{
-			new folderWindow(fClient);
-		}
-		else
-		{
-			new mainWindow(fClient);
-		}
+			//}
+//		}
+//		catch (IOException ex)
+//		{
+//			result = "Erreur";
+//			ex.printStackTrace();
+//		}
 		
 //		for (int i = 0; i < 4; i++) {
 //	    	String urlJson = "http://www.youtubeinmp3.com/fetch/?format=JSON&filesize=1&video=https://www.youtube.com/watch?v=1XZGHOxnCto";
@@ -152,10 +133,10 @@ public class launchAct
 	{	
 		new File(PC_PATH).mkdir();
 		
-		new File(PC_PATH+"music.txt").createNewFile();
 		new File(PC_PATH+"new_url.txt").createNewFile();
 		new File(PC_PATH+"new_title.txt").createNewFile();
 		new File(PC_PATH+"setup.txt").createNewFile();
+		new File(PC_PATH+"user.txt").createNewFile();
 	}
 	
 	private static boolean checkConn()
@@ -174,5 +155,19 @@ public class launchAct
 	{
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
 		return new String(encoded, Charset.defaultCharset());
+	}
+	
+	private static String printServerReply(FTPClient ftpClient)
+	{
+		String txtR = "";
+		String[] msgs = ftpClient.getReplyStrings();
+		if(msgs != null && msgs.length > 0)
+		{
+			for (String string : msgs)
+			{
+				txtR += newline+"SERVER: "+string;
+			}
+		}
+		return txtR;
 	}
 }

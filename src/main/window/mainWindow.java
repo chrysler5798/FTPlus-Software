@@ -1,6 +1,6 @@
 package main.window;
 
-import java.awt.Dimension; 
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -38,7 +38,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.net.ftp.FTPClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -67,7 +66,7 @@ public class mainWindow extends JFrame {
 	File newSon;
 	Media music;
 	
-	public mainWindow(FTPClient fClient) {
+	public mainWindow() {
 		
 		setTitle("FTPlus");
 		
@@ -334,7 +333,7 @@ public class mainWindow extends JFrame {
 					            
 					            InputStream inputStream = new FileInputStream(musicTxt);
 					            
-					            boolean doneUp = fClient.storeFile("ftplus/khrys/"+musicTxtName, inputStream);
+					            boolean doneUp = false;
 					            
 					            inputStream.close();
 					            
