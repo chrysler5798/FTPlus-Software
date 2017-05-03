@@ -48,8 +48,8 @@ public class userWindow extends JFrame
 		JButton btnConn = new JButton("Connexion");
 		JButton btnInsc = new JButton("Inscription");
 		
-		btnConn.addActionListener(new userListener(txtPseudoConn, fieldConn));
-		btnInsc.addActionListener(new userListener(txtPseudoInsc, fieldInsc));
+		btnConn.addActionListener(new userListener(this, txtPseudoConn, fieldConn));
+		btnInsc.addActionListener(new userListener(this, txtPseudoInsc, fieldInsc));
 		
 		panelConn.setLayout(new MigLayout("", "[92px][grow][grow]", "[grow][][][][grow]"));
 		panelInsc.setLayout(new MigLayout("", "[92px][grow][grow]", "[grow][][][][grow]"));

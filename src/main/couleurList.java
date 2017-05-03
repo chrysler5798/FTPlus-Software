@@ -19,21 +19,20 @@ public class couleurList extends DefaultListCellRenderer
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
     {
         Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		try {
-	         String txtFileNew = readFile(PC_PATH+"new_title.txt", Charset.defaultCharset());
+		try
+		{
+			byte[] encoded = Files.readAllBytes(Paths.get(PC_PATH+"new_title.txt"));
+			String txtFileNew = new String(encoded, Charset.defaultCharset());
+			
 			if(txtFileNew != "" && txtFileNew.contains((CharSequence) value))
 	        {
 				c.setBackground(new Color(255,196,196));
 	        }
-		} catch (IOException e) {
+		}
+		catch (IOException e)
+		{
 			e.printStackTrace();
 		}
         return c;
     }
-    
-	static String readFile(String path, Charset encoding) throws IOException 
-	{
-		byte[] encoded = Files.readAllBytes(Paths.get(path));
-		return new String(encoded, encoding);
-	}
 }

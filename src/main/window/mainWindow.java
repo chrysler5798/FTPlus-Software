@@ -21,6 +21,9 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import javax.swing.DefaultListModel;
@@ -37,6 +40,9 @@ import javax.swing.SwingWorker.StateValue;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpException;
+import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.io.FileUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -51,10 +57,13 @@ import main.couleurList;
 import main.listener.ouvrirListener;
 import net.miginfocom.swing.MigLayout;
 
-public class mainWindow extends JFrame {
+public class mainWindow extends JFrame
+{
 
 	static private final String newline = "\n";
 	private final String PC_PATH = System.getenv("APPDATA")+File.separator+"FTPlus"+File.separator;
+	private String SITE_POST = "";
+	
 	JTextArea textArea;
 	int i = 0;
 	JList<String> list;
@@ -66,9 +75,10 @@ public class mainWindow extends JFrame {
 	File newSon;
 	Media music;
 	
-	public mainWindow() {
+	public mainWindow()
+	{
 		
-		setTitle("FTPlus");
+		setTitle("FTPlus - "+getUser());
 		
 		setSize(1400,600);
 		
@@ -118,10 +128,12 @@ public class mainWindow extends JFrame {
 		ouvrirButton.setFont(buttonFont);
 		syncButton.setFont(buttonFont);
 
-		list.addListSelectionListener(new ListSelectionListener() {
+		list.addListSelectionListener(new ListSelectionListener()
+		{
 			
 			@Override
-			public void valueChanged(ListSelectionEvent e) {
+			public void valueChanged(ListSelectionEvent e)
+			{
 				//String value = list.getSelectedValue();
 				//if(value != null)
 				//{
@@ -153,16 +165,17 @@ public class mainWindow extends JFrame {
 		
 		isTrue = false;
 		
-		playButton.addActionListener(new ActionListener() {
+		playButton.addActionListener(new ActionListener()
+		{
 			
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e)
+			{
 				if(isTrue)
 				{
 					if(mp3isTrue)
 					{
 						playButton.setIcon(new ImageIcon(getClass().getResource("/main/img/play.png")));
-//						mediaP.stop();
 						isTrue = false;
 					}
 				}
@@ -171,7 +184,6 @@ public class mainWindow extends JFrame {
 					if(mp3isTrue)
 					{
 						playButton.setIcon(new ImageIcon(getClass().getResource("/main/img/pause.png")));
-//						mediaP.play();
 						isTrue = true;
 					}
 				}
@@ -196,23 +208,27 @@ public class mainWindow extends JFrame {
 		    webView.getEngine().load("http://www.youtube.com/");
 		});
 		
-		addButton.addActionListener(new ActionListener() {
+		addButton.addActionListener(new ActionListener()
+		{
 			
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e)
+			{
 				try {
 					waitForRunLater(webView);
 					
 					String videoId = convertToShortYt(webView.getEngine().getLocation());
 			    	String urlToDl = "http://www.youtubeinmp3.com/fetch/?format=JSON&video=https://www.youtube.com/watch?v="+videoId;
-					
+			    	
 				    JSONObject json = readJsonFromUrl(urlToDl);
 				    
 				    String titleVideo = json.getString("title");
 				    
-			    	String fileBefore = readFile(PC_PATH+"music.txt", Charset.defaultCharset());
-			    	String newUrl = readFile(PC_PATH+"new_url.txt", Charset.defaultCharset());
-			    	String newSongs = readFile(PC_PATH+"new_title.txt", Charset.defaultCharset());
+				    addMusic(videoId, titleVideo);
+				    
+			    	String fileBefore = readFile(PC_PATH+"music.txt");
+			    	String newUrl = readFile(PC_PATH+"new_url.txt");
+			    	String newSongs = readFile(PC_PATH+"new_title.txt");
 			    	
 			    	if(!fileBefore.contains((CharSequence) videoId) &&
 			    			!newUrl.contains((CharSequence) videoId) &&
@@ -223,9 +239,9 @@ public class mainWindow extends JFrame {
 				    	file.write(newUrl+videoId+newline);
 				    	file.close();
 				    	
-				    	FileWriter writerNew = new FileWriter(new File(PC_PATH+"new_title.txt"));
-				    	writerNew.write(newSongs+titleVideo+newline);
-				    	writerNew.close();
+				    	//FileWriter writerNew = new FileWriter(new File(PC_PATH+"new_title.txt"));
+				    	//writerNew.write(newSongs+titleVideo+newline);
+				    	//writerNew.close();
 				    	
 				    	supButton.setEnabled(false);
 				    	
@@ -262,14 +278,16 @@ public class mainWindow extends JFrame {
 			}
 		});
 		
-		syncButton.addActionListener(new ActionListener() {
+		syncButton.addActionListener(new ActionListener()
+		{
 			
 			@Override
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e)
+			{
 		    	
 					try {
-						String newSongs = readFile(PC_PATH+"music.txt", Charset.defaultCharset());
-				    	String newUrl = readFile(PC_PATH+"new_url.txt", Charset.defaultCharset());
+						String newSongs = readFile(PC_PATH+"music.txt");
+				    	String newUrl = readFile(PC_PATH+"new_url.txt");
 				    	PrintWriter printNew = new PrintWriter(new File(PC_PATH+"music.txt"));
 				    	printNew.print(newSongs+newUrl);
 				    	printNew.close();
@@ -292,7 +310,7 @@ public class mainWindow extends JFrame {
 								
 								String newtitleVideo = titleVideo.replaceAll("[^a-zA-Z0-9.-]", "_");
 								
-								String pathforMusic = readFile(PC_PATH+"setup.txt", Charset.defaultCharset());
+								String pathforMusic = readFile(PC_PATH+"setup.txt");
 								newSon = new File(pathforMusic+File.separator+newtitleVideo+".mp3");
 								
 								SwingWorker sw = new SwingWorker()
@@ -355,9 +373,9 @@ public class mainWindow extends JFrame {
 							System.out.println(e4);
 						}
 				    	
-				    	PrintWriter printToEdit = new PrintWriter(new File(PC_PATH+"new_title.txt"));
-		        		printToEdit.print("");
-				    	printToEdit.close();
+				    	//PrintWriter printToEdit = new PrintWriter(new File(PC_PATH+"new_title.txt"));
+		        		//printToEdit.print("");
+				    	//printToEdit.close();
 				    	
 						PrintWriter print = new PrintWriter(new File(PC_PATH+"new_url.txt"));
 						print.print("");
@@ -394,43 +412,54 @@ public class mainWindow extends JFrame {
 					}
 		});
 		
-		supButton.addActionListener(new ActionListener() {
+		supButton.addActionListener(new ActionListener()
+		{
 			
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				String pathforMusic = "";
-				try {
-					pathforMusic = readFile(PC_PATH+"setup.txt", Charset.defaultCharset());
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				}
-				File fileToRm = new File(pathforMusic+list.getSelectedValue());
-
-				if(fileToRm.delete())
-				{
-					setupList();
-				}
-				else
-				{
-					System.out.println("Fail sup : "+pathforMusic+list.getSelectedValue());
-				}
+			public void actionPerformed(ActionEvent e)
+			{
+				System.out.println(list.getModel().getSize());
+				System.out.println(list.getModel().getElementAt(0));
+//				String pathforMusic = "";
+//				try
+//				{
+//					pathforMusic = readFile(PC_PATH+"setup.txt");
+//				}
+//				catch (IOException e1)
+//				{
+//					e1.printStackTrace();
+//				}
+//				File fileToRm = new File(pathforMusic+list.getSelectedValue());
+//
+//				if(fileToRm.delete())
+//				{
+//					setupList();
+//				}
+//				else
+//				{
+//					System.out.println("Fail sup : "+pathforMusic+list.getSelectedValue());
+//				}
 			}
 		});
 		
-		textArea.addKeyListener(new KeyListener() {
+		textArea.addKeyListener(new KeyListener()
+		{
 			
 			@Override
-			public void keyTyped(KeyEvent e) {
+			public void keyTyped(KeyEvent e)
+			{
 				
 			}
 			
 			@Override
-			public void keyReleased(KeyEvent e) {
+			public void keyReleased(KeyEvent e)
+			{
 				
 			}
 			
 			@Override
-			public void keyPressed(KeyEvent e) {
+			public void keyPressed(KeyEvent e)
+			{
 				btnNewButton_1.setEnabled(true);
 			}
 		});
@@ -463,14 +492,12 @@ public class mainWindow extends JFrame {
 //        	System.out.println("Open command cancelled by user." + newline);
 //        }
 		setVisible(true);
-        
-
 	}
 	
-	static String readFile(String path, Charset encoding) throws IOException 
+	static String readFile(String path) throws IOException 
 	{
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
-		return new String(encoded, encoding);
+		return new String(encoded, Charset.defaultCharset());
 	}
 	
 	private String convertToShortYt(String url)
@@ -480,6 +507,57 @@ public class mainWindow extends JFrame {
     	return url.substring(debutId, finId);
 	}
 	
+	private String getUser()
+	{
+		try
+		{
+			return readFile(PC_PATH+"user.txt");
+		}
+		catch (IOException e1)
+		{
+			return e1.toString();
+		}
+	}
+	
+	private boolean addMusic(String urlMusic, String titleMusic) throws IOException
+	{
+    	HttpClient client = new HttpClient();
+    	PostMethod postGet = new PostMethod(SITE_POST);
+    
+    	postGet.addParameter("type", "4");
+    	postGet.addParameter("username", getUser());
+    	
+    	if(client.executeMethod(postGet) == 200)
+    	{
+    		String musicOld = postGet.getResponseBodyAsString();
+    		musicOld = musicOld.substring(1,musicOld.length());
+    		
+    		List<String> listMusic = new ArrayList<String>(Arrays.asList(musicOld.split(",")));
+    		
+    		listMusic.add(urlMusic);
+    		listMusic.add(titleMusic);
+    		
+    		PostMethod postUp = new PostMethod(SITE_POST);
+    		
+    		postUp.addParameter("type", "3");
+    		postUp.addParameter("username", getUser());
+    		postUp.addParameter("music", listMusic.toString());
+        	
+        	if(client.executeMethod(postUp) == 200 && postUp.getResponseBodyAsString().equals("1"))
+        	{
+        		return true;
+        	}
+        	else
+        	{
+        		return false;
+        	}
+    	}
+    	else
+    	{
+    		return false;
+    	}
+	}
+	
 	public void setupList()
 	{
 		model.removeAllElements();
@@ -487,29 +565,72 @@ public class mainWindow extends JFrame {
 		
 		list.setCellRenderer(new couleurList());
 		
-		try (BufferedReader br = new BufferedReader(new FileReader(new File(PC_PATH+"music.txt")))) {
-		    String line;
-		    while ((line = br.readLine()) != null) {
-		    	String urlToDl = "http://www.youtubeinmp3.com/fetch/?format=JSON&video=https://www.youtube.com/watch?v="+line;
-		    	JSONObject json = readJsonFromUrl(urlToDl);
-			    String titleVideo = json.getString("title");
-		       model.addElement(titleVideo);
-		       
-		    }
-		    
-		} catch (Exception e4){
-			System.out.println(e4);
+		HttpClient client = new HttpClient();
+		PostMethod post = new PostMethod("http://164.132.145.12/ftplus/account.php");
+		
+		post.addParameter("type","4");
+		post.addParameter("username",getUser());
+		
+		String resultMusic = "";
+		
+		try
+		{
+			client.executeMethod(post);
+			resultMusic = post.getResponseBodyAsString();
+		}
+		catch (HttpException e)
+		{
+			e.printStackTrace();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
 		}
 		
+		resultMusic = resultMusic.substring(1, resultMusic.length());
+		resultMusic.replace("[", "");
+		resultMusic.replace("]", "");		
 		
-		try (BufferedReader br = new BufferedReader(new FileReader(new File(PC_PATH+"new_title.txt")))) {
+		List<String> listMusic = new ArrayList<String>(Arrays.asList(resultMusic.split(",")));
+		
+		for (String music : listMusic)
+		{
+			if(!music.isEmpty())
+			{
+				model.addElement(music);
+			}
+		}
+		
+//		try (BufferedReader br = new BufferedReader(new FileReader(new File(PC_PATH+"music.txt"))))
+//		{
+//		    String line;
+//		    while ((line = br.readLine()) != null)
+//		    {
+//		    	String urlToDl = "http://www.youtubeinmp3.com/fetch/?format=JSON&video=https://www.youtube.com/watch?v="+line;
+//		    	JSONObject json = readJsonFromUrl(urlToDl);
+//			    String titleVideo = json.getString("title");
+//		       model.addElement(titleVideo);
+//		       
+//		    }
+//		    
+//		}
+//		catch (Exception e4)
+//		{
+//			System.out.println(e4);
+//		}
+		
+		
+		try (BufferedReader br = new BufferedReader(new FileReader(new File(PC_PATH+"new_title.txt"))))
+		{
 		    String line;
-		    while ((line = br.readLine()) != null) {
+		    while ((line = br.readLine()) != null)
+		    {
 		       model.addElement(line);
 		       
 		    }
-		    
-		} catch (Exception e4){
+		}
+		catch (Exception e4)
+		{
 			System.out.println(e4);
 		}
 		
@@ -524,21 +645,23 @@ public class mainWindow extends JFrame {
 		list.setSelectedIndex(0);
 	}
 	
-	public static void waitForRunLater(WebView webView) throws InterruptedException {
+	public static void waitForRunLater(WebView webView) throws InterruptedException
+	{
 	    Semaphore semaphore = new Semaphore(0);
-		Platform.runLater((new Runnable() {
-			
+		Platform.runLater((new Runnable()
+		{
 			@Override
-			public void run() {
+			public void run()
+			{
 				webView.getEngine().reload();
 				semaphore.release();
 			}
 		}));
 	    semaphore.acquire();
-
 	}
 	
-	  private static String readAll(Reader rd) throws IOException {
+	  private static String readAll(Reader rd) throws IOException
+	  {
 		    StringBuilder sb = new StringBuilder();
 		    int cp;
 		    while ((cp = rd.read()) != -1) {
@@ -547,7 +670,8 @@ public class mainWindow extends JFrame {
 		    return sb.toString();
 		  }
 
-	public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException {
+	public static JSONObject readJsonFromUrl(String url) throws IOException, JSONException
+	{
 		InputStream is = new URL(url).openStream();
 		try {
 		      BufferedReader rd = new BufferedReader(new InputStreamReader(is, Charset.forName("UTF-8")));

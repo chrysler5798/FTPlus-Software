@@ -28,7 +28,7 @@ public class folderWindow extends JFrame
 		
 		setResizable(false);
 		
-		setTitle("Installation");
+		setTitle("FTPlus - Dossier de musique");
 		
 		getContentPane().setLayout(new MigLayout("", "[400px]", "[200px][191px][]"));
 		
@@ -47,7 +47,6 @@ public class folderWindow extends JFrame
 		
 		selectButton.addActionListener(new ActionListener()
 		{
-			
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
@@ -74,6 +73,7 @@ public class folderWindow extends JFrame
 			public void actionPerformed(ActionEvent e)
 			{
 				String field = fieldFolder.getText();
+				
 				if(field.isEmpty())
 				{
 					msgSelectFolder.setText("Dossier introuvable !");

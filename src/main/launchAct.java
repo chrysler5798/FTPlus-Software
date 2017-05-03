@@ -27,6 +27,7 @@ public class launchAct
 		
 		setupFolder();
 		
+		
 		if(!checkConn())
 		{
 		    JOptionPane optionPane = new JOptionPane("Aucune connexion Internet",JOptionPane.WARNING_MESSAGE);
@@ -36,7 +37,6 @@ public class launchAct
 		    dialog.setVisible(true);
 		    System.exit(0);
 		}
-		
 		
 		if(readFile(PC_PATH+"user.txt").isEmpty())
 		{
