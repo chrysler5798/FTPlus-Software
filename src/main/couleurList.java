@@ -15,16 +15,22 @@ public class couleurList extends DefaultListCellRenderer
 {
 	private final String PC_PATH = System.getenv("APPDATA")+File.separator+"FTPlus"+File.separator;
 	
+	
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
     {
         Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 		try
 		{
-			byte[] encoded = Files.readAllBytes(Paths.get(PC_PATH+"new_title.txt"));
-			String txtFileNew = new String(encoded, Charset.defaultCharset());
+			byte[] encodedTitle = Files.readAllBytes(Paths.get(PC_PATH+"new_title.txt"));
+			byte[] encodedSetup = Files.readAllBytes(Paths.get(PC_PATH+"setup.txt"));
 			
-			if(txtFileNew != "" && txtFileNew.contains((CharSequence) value))
+			String txtFileNew = new String(encodedTitle, Charset.defaultCharset());
+			String txtSetup = new String(encodedSetup, Charset.defaultCharset());
+			
+			File fileValue = new File(txtSetup+File.separator+value+".mp3");
+			
+			if(txtFileNew != "" && txtFileNew.contains((CharSequence) value) || !(fileValue.exists()))
 	        {
 				c.setBackground(new Color(255,196,196));
 	        }
