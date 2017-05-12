@@ -321,7 +321,7 @@ public class mainWindow extends JFrame
 							    
 							    int fileSize = json.getInt("filesize")/1028;
 							    
-							    addMusic(line, titleVideo);
+							    editMusic(line, titleVideo);
 							    
 								URL ytUrl = new URL(urlToDl);
 								
@@ -391,8 +391,15 @@ public class mainWindow extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				System.out.println(list.getModel().getSize());
-				System.out.println(list.getModel().getElementAt(0));
+				try
+				{
+					editMusic("", list.getSelectedValue());
+					System.out.println(list.getSelectedValue());
+				} 
+				catch (IOException e1)
+				{
+					e1.printStackTrace();
+				}
 //				String pathforMusic = "";
 //				try
 //				{
@@ -492,7 +499,7 @@ public class mainWindow extends JFrame
 		}
 	}
 	
-	private boolean addMusic(String urlMusic, String titleMusic) throws IOException
+	private boolean editMusic(String urlMusic, String titleMusic) throws IOException
 	{
     	HttpClient client = new HttpClient();
 		
@@ -500,20 +507,34 @@ public class mainWindow extends JFrame
 		
     	if(listMusic != null)
     	{
-    		urlMusic = urlMusic.replaceAll("\\s+","");
-    		
-    		listMusic.add(urlMusic);
-    		
-    		titleMusic = StringUtils.stripAccents(titleMusic);
-    		
-    		listMusic.add(titleMusic);
+    		if(urlMusic.equals(""))
+    		{
+        		for (int i = 1; i < listMusic.size(); i+=2)
+        		{
+					String act = listMusic.get(i).trim();
+					if(act.equals(titleMusic))
+					{
+						listMusic.remove(i);
+						listMusic.remove(i-1);
+					}
+				}
+    		}
+    		else
+    		{
+    			urlMusic = urlMusic.replaceAll("\\s+","");
+    			
+        		listMusic.add(urlMusic);
+        		
+        		titleMusic = StringUtils.stripAccents(titleMusic);
+        		
+        		listMusic.add(titleMusic);
+    		}
     		
     		PostMethod postUp = new PostMethod(SITE_POST);
     		
     		postUp.addParameter("type", "3");
     		postUp.addParameter("username", getUser());
     		postUp.addParameter("music", listMusic.toString());
-    		System.out.println(listMusic.toString());
     		
         	if(client.executeMethod(postUp) == 200 && postUp.getResponseBodyAsString().equals("1"))
         	{
@@ -584,10 +605,10 @@ public class mainWindow extends JFrame
 			}
 			
 			public void done()
-			{            
+			{     
 				if(SwingUtilities.isEventDispatchThread())
 				{
-					if(sizeVideo<25)
+					if(newSon.length()/1028<sizeVideo)
 					{
 						try
 						{
