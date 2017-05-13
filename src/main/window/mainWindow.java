@@ -67,7 +67,7 @@ public class mainWindow extends JFrame
 	JTextArea textArea;
 	int i = 0;
 	JList<String> list;
-	JButton btnNewButton_1;
+	JButton btnNewButton_1, supButton;
 	boolean isTrue, mp3isTrue;
 	WebView webView;
 	MediaPlayer mediaP;
@@ -107,7 +107,7 @@ public class mainWindow extends JFrame
 		JButton ouvrirButton = new JButton("OUVRIR");
 		JButton syncButton = new JButton("SYNC");
 		JButton playButton = new JButton();
-		JButton supButton = new JButton();
+		supButton = new JButton();
 		
 		addButton.setIcon(new ImageIcon(getClass().getResource("/main/img/add.png")));
 		ouvrirButton.setIcon(new ImageIcon(getClass().getResource("/main/img/browser.png")));
@@ -172,19 +172,13 @@ public class mainWindow extends JFrame
 			{
 				if(isTrue)
 				{
-					if(mp3isTrue)
-					{
-						playButton.setIcon(new ImageIcon(getClass().getResource("/main/img/play.png")));
-						isTrue = false;
-					}
+					playButton.setIcon(new ImageIcon(getClass().getResource("/main/img/play.png")));
+					isTrue = false;
 				}
 				else
 				{
-					if(mp3isTrue)
-					{
-						playButton.setIcon(new ImageIcon(getClass().getResource("/main/img/pause.png")));
-						isTrue = true;
-					}
+					playButton.setIcon(new ImageIcon(getClass().getResource("/main/img/pause.png")));
+					isTrue = true;
 				}
 				
 			}
@@ -236,10 +230,11 @@ public class mainWindow extends JFrame
 				    	file.close();
 				    	
 				    	FileWriter writerNew = new FileWriter(new File(PC_PATH+"new_title.txt"));
+				    	titleVideo = StringUtils.stripAccents(titleVideo);
 				    	writerNew.write(newSongs+titleVideo+newline);
 				    	writerNew.close();
 				    	
-				    	supButton.setEnabled(false);
+				    	switchSupButton(false);
 				    	
 				    	setupList();
 			    	}
@@ -303,7 +298,7 @@ public class mainWindow extends JFrame
 							    int fileSize = json.getInt("filesize")/1028;
 							    
 								URL ytUrl = new URL(urlToDl);
-				    			downloadMusic(titleVideo, ytUrl, fileSize);
+				    			downloadMusic(titleVideo, id, ytUrl, fileSize);
 				    		}
 						}
 				    	
@@ -325,19 +320,7 @@ public class mainWindow extends JFrame
 							    
 								URL ytUrl = new URL(urlToDl);
 								
-								downloadMusic(titleVideo, ytUrl, fileSize);
-								
-								//String newtitleVideo = titleVideo.replaceAll("[^a-zA-Z0-9.-]", "_");
-					            
-								//String musicTxtName = "music.txt";
-								
-					            //File musicTxt = new File(PC_PATH+musicTxtName);
-					            
-					            //InputStream inputStream = new FileInputStream(musicTxt);
-					            
-					            //boolean doneUp = false;
-					            
-					            //inputStream.close();
+								downloadMusic(titleVideo, line, ytUrl, fileSize);
 						    }
 						    
 						}
@@ -345,15 +328,6 @@ public class mainWindow extends JFrame
 						{
 							System.out.println(e4);
 						}
-				    	
-				    	PrintWriter printToEdit = new PrintWriter(new File(PC_PATH+"new_title.txt"));
-		        		printToEdit.print("");
-				    	printToEdit.close();
-				    	
-						PrintWriter print = new PrintWriter(new File(PC_PATH+"new_url.txt"));
-						print.print("");
-						print.close();
-
 					}
 					catch (FileNotFoundException e1)
 					{
@@ -363,26 +337,7 @@ public class mainWindow extends JFrame
 					{
 						e1.printStackTrace();
 					}
-//					if(file.length() < 104857600)
-//			        {
-//						try {
-//			                   FileInputStream fileUp = new FileInputStream(file);
-//			                   fClient.setFileTransferMode(FTP.BINARY_FILE_TYPE);
-//			                   fClient.storeFile("ftplus/"+name, fileUp);
-//			                   System.out.println(printServerReply(fClient));
-//			                   fileUp.close();
-//			                   fClient.logout();
-//			                    
-//			               	 } catch (IOException e1)
-//			                 {
-//			               		 e1.printStackTrace();
-//			                 }
-//			        }
-//			        else
-//			        {
-//			           System.out.println("Erreur : fichier trop lourd ("+name+")");
-//			        }
-					}
+				}
 		});
 		
 		supButton.addActionListener(new ActionListener()
@@ -394,7 +349,7 @@ public class mainWindow extends JFrame
 				try
 				{
 					editMusic("", list.getSelectedValue());
-					System.out.println(list.getSelectedValue());
+					setupList();
 				} 
 				catch (IOException e1)
 				{
@@ -518,6 +473,15 @@ public class mainWindow extends JFrame
 						listMusic.remove(i-1);
 					}
 				}
+        		
+        		String pathFolder = readFile(PC_PATH+"setup.txt");
+        		
+        		File sonToDel = new File(pathFolder+File.separator+titleMusic+".mp3");
+        		
+        		if(sonToDel.exists())
+        		{
+        			sonToDel.delete();
+        		}
     		}
     		else
     		{
@@ -588,13 +552,18 @@ public class mainWindow extends JFrame
 		}
 	}
 	
-	void downloadMusic(String titleVideo, URL urlVideo, int sizeVideo) throws IOException
+	void switchSupButton(boolean statut)
 	{
+		supButton.setEnabled(statut);
+	}
+	
+	void downloadMusic(String titleVideo, String idVideo, URL urlVideo, int sizeVideo) throws IOException
+	{
+		final String title = StringUtils.stripAccents(titleVideo);
+		
 		String pathFolder = readFile(PC_PATH+"setup.txt");
 		
-		titleVideo = StringUtils.stripAccents(titleVideo);
-		
-		File newSon = new File(pathFolder+File.separator+titleVideo+".mp3");
+		File newSon = new File(pathFolder+File.separator+title+".mp3");
 		
 		SwingWorker sw = new SwingWorker()
 		{
@@ -605,7 +574,7 @@ public class mainWindow extends JFrame
 			}
 			
 			public void done()
-			{     
+			{
 				if(SwingUtilities.isEventDispatchThread())
 				{
 					if(newSon.length()/1028<sizeVideo)
@@ -620,11 +589,46 @@ public class mainWindow extends JFrame
 							e.printStackTrace();
 						}
 					}
-					else
-					{
-						setupList();
-					}
 		        }
+				
+		    	PrintWriter printTitle, printUrl;
+				try
+				{
+					String pathTitle = PC_PATH+"new_title.txt";
+					String pathUrl = PC_PATH+"new_url.txt";
+					
+					String titles = readFile(pathTitle);
+					String urls = readFile(pathUrl);
+					
+					System.out.println(titles);
+					System.out.println(urls);
+					
+					titles = titles.replace(title, "");
+					urls = urls.replace(idVideo, "");
+					
+					System.out.println(titles);
+					System.out.println(urls);
+					
+					printTitle = new PrintWriter(new File(pathTitle));
+					printUrl = new PrintWriter(new File(pathUrl));
+					
+					printTitle.print(titles.trim());
+					printUrl.print(urls.trim());
+					
+					printTitle.close();
+					printUrl.close();
+				}
+				catch (FileNotFoundException e)
+				{
+					e.printStackTrace();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
+				
+				setupList();
+				switchSupButton(true);
 			} 
 		};
 		
@@ -672,25 +676,6 @@ public class mainWindow extends JFrame
 				model.addElement(music);
 			}
 		}
-		
-		//		try (BufferedReader br = new BufferedReader(new FileReader(new File(PC_PATH+"music.txt"))))
-		//		{
-		//		    String line;
-		//		    while ((line = br.readLine()) != null)
-		//		    {
-		//		    	String urlToDl = "http://www.youtubeinmp3.com/fetch/?format=JSON&video=https://www.youtube.com/watch?v="+line;
-		//		    	JSONObject json = readJsonFromUrl(urlToDl);
-		//			    String titleVideo = json.getString("title");
-		//		       model.addElement(titleVideo);
-		//		       
-		//		    }
-		//		    
-		//		}
-		//		catch (Exception e4)
-		//		{
-		//			System.out.println(e4);
-		//		}
-		
 		
 		try (BufferedReader br = new BufferedReader(new FileReader(new File(PC_PATH+"new_title.txt"))))
 		{
