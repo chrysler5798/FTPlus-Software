@@ -1,14 +1,18 @@
 package main.window;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -43,8 +47,8 @@ public class folderWindow extends JFrame
 		
 		fieldFolder.setColumns(10);
 		
-		selectButton.setIcon(new ImageIcon(getClass().getResource("/main/img/seach.png")));
-		
+		selectButton.setIcon(new ImageIcon(getClass().getResource("/search.png")));
+		    
 		selectButton.addActionListener(new ActionListener()
 		{
 			@Override

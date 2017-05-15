@@ -109,11 +109,11 @@ public class mainWindow extends JFrame
 		JButton playButton = new JButton();
 		supButton = new JButton();
 		
-		addButton.setIcon(new ImageIcon(getClass().getResource("/main/img/add.png")));
-		ouvrirButton.setIcon(new ImageIcon(getClass().getResource("/main/img/browser.png")));
-		syncButton.setIcon(new ImageIcon(getClass().getResource("/main/img/sync.png")));
-		playButton.setIcon(new ImageIcon(getClass().getResource("/main/img/play.png")));
-		supButton.setIcon(new ImageIcon(getClass().getResource("/main/img/delete.png")));
+		addButton.setIcon(new ImageIcon(getClass().getResource("/add.png")));
+		ouvrirButton.setIcon(new ImageIcon(getClass().getResource("/browser.png")));
+		syncButton.setIcon(new ImageIcon(getClass().getResource("/sync.png")));
+		playButton.setIcon(new ImageIcon(getClass().getResource("/play.png")));
+		supButton.setIcon(new ImageIcon(getClass().getResource("/delete.png")));
 		
 		getContentPane().add(addButton, "cell 2 0,grow");
 		getContentPane().add(ouvrirButton, "cell 2 0,grow");
