@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import javax.swing.JFrame;
+import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 
@@ -23,31 +24,47 @@ import main.window.mainWindow;
 
 public class userListener implements ActionListener
 {
-	JFrame window;
-	JTextPane txtPane;
-	JTextField txtField;
+	private String SITE_POST = "";
 	
-	public userListener(JFrame window, JTextPane txtPane, JTextField txtField)
+	JFrame window;
+	JTextPane txtPane, passPane;
+	JTextField txtField;
+	JTextField txtFieldPass;
+	
+	public userListener(JFrame window, JTextPane txtPane, JTextPane passPane, JTextField txtField, JPasswordField txtFieldPass)
 	{
-		this.txtPane = txtPane;
-		this.txtField = txtField;
 		this.window = window;
+		this.txtPane = txtPane;
+		this.passPane = passPane;
+		this.txtField = txtField;
+		this.txtFieldPass = txtFieldPass;
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
 		String txtTyped = txtField.getText();
+		String passTyped = txtFieldPass.getText();
+		
 		String typeCommand = e.getActionCommand();
 		
-		if(txtTyped.isEmpty())
+		if(txtTyped.isEmpty() && passTyped.isEmpty())
 		{
 			setText("Veuillez entrer un pseudo !", Color.RED);
+			setTextPass("Veuillez entrer un mot de passe !", Color.RED);
+		}
+		else if(txtTyped.isEmpty())
+		{
+			setText("Veuillez entrer un pseudo !", Color.RED);
+		}
+		else if(passTyped.isEmpty())
+		{
+			setTextPass("Veuillez entrer un mot de passe !", Color.RED);
 		}
 		else
 		{
 			HttpClient client = new HttpClient();
-			PostMethod post = new PostMethod("http://164.132.145.12/ftplus/account.php");
+			PostMethod post = new PostMethod(SITE_POST);
 			String typePhp = "";
 			
 			switch(typeCommand)
@@ -63,6 +80,7 @@ public class userListener implements ActionListener
 			
 			post.addParameter("type", typePhp);
 			post.addParameter("username",txtTyped);
+			post.addParameter("password",passTyped);
 			
 			try
 			{
@@ -73,6 +91,7 @@ public class userListener implements ActionListener
 				else
 				{
 					setText("Pseudo :", Color.BLACK);
+					setTextPass("Mot de passe :", Color.BLACK);
 					
 					String response = post.getResponseBodyAsString(1);
 					
@@ -100,6 +119,10 @@ public class userListener implements ActionListener
 						case "3":
 							setText("Ce pseudo n'existe pas !", Color.RED);
 							break;
+							
+						case "4":
+							setTextPass("Mot de passe incorect !", Color.RED);
+							break;
 						}
 					}
 				}
@@ -120,6 +143,12 @@ public class userListener implements ActionListener
 	{
 		txtPane.setForeground(color);
 		txtPane.setText(txt);
+	}
+	
+	void setTextPass(String txt, Color color)
+	{
+		passPane.setForeground(color);
+		passPane.setText(txt);
 	}
 	
 	void doneUser(String pseudo)
